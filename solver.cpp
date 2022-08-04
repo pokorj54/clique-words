@@ -103,7 +103,7 @@ bool find_clique(const adj_matrix_t & adj_matrix, const vector<vertex_t> & inter
 	}
 	bool result = false;
 	for(vertex_t v : intersection_vertices){
-		if(last < v && neighbors_all(adj_matrix, v, acc)){
+		if(last < v){
 			acc.push_back(v);
 			vector<vertex_t> new_intersection = intersect(intersection_vertices, adj_matrix[v]);
 			int v_footprint = add_to_footprint(current_footprint, word_list[v]);
