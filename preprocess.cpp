@@ -164,12 +164,10 @@ vector<size_t> intersect(const vector<size_t> & current, const vector<bool> & ne
 	return intersection;
 }
 
-void find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc){
+void find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc, 
+					vector<vector<size_t>> & cliques){
 	if(k == acc.size()){
-		for(size_t w : acc){
-			cout << w << " ";
-		}
-		cout  << endl;
+		cliques.push_back(acc);
 		return;
 	}
 	size_t last = acc[acc.size()-1];
@@ -177,9 +175,18 @@ void find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> &
 		if(last < v && neighbors_all(adj_matrix, v, acc)){
 			acc.push_back(v);
 			vector<size_t> new_intersection = intersect(intersection_vertices, adj_matrix[v]);
-			find_clique(adj_matrix, new_intersection, k, acc);
+			find_clique(adj_matrix, new_intersection, k, acc, cliques);
 			acc.pop_back();
 		}
+	}
+}
+
+void print_cliques(const vector<vector<size_t>> & cliques, const vector<string> & word_list){
+	for(size_t i = 0; i < cliques.size(); ++i){
+		for(size_t j = 0; j < cliques[i].size(); ++j){
+			cout << word_list[cliques[i][j]] << " ";
+		}
+		cout << endl;
 	}
 }
 
@@ -191,10 +198,12 @@ int main(void){
 	cerr << "constructed graph" << endl;
 	vector<vector<bool>> adj_matrix = get_adj_matrix(edges);
 	cerr << "adj matrix" << endl;
+	vector<vector<size_t>> cliques;
 	for(size_t v = 0; v < edges.size(); ++v){
 		vector<size_t> acc{v};
 		cerr << v << endl;
-		find_clique(adj_matrix, edges[v], 5, acc);
+		find_clique(adj_matrix, edges[v], 5, acc, cliques);
 	}
+	print_cliques(cliques, word_list);
 	return 0;	
 }
