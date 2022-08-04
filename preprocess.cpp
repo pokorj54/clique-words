@@ -51,14 +51,19 @@ void print_METIS(const vector<vector<size_t>> & edges){
 	}
 }
 
-void print_custom(const vector<vector<size_t>> & edges){
-	size_t total_edges = get_total_size(edges);
-	cout << edges.size() << endl << total_edges << endl;
+
+void print_edge_per_line(const vector<vector<size_t>> & edges, char separator){
 	for(size_t i = 0; i < edges.size(); ++i){
 		for(size_t j = 0; j < edges[i].size(); ++j){
-			cout << i << "," << edges[i][j] << endl;
+			cout << i << separator << edges[i][j] << endl;
 		}
 	}
+}
+
+void print_quick_clique_format(const vector<vector<size_t>> & edges){
+	size_t total_edges = get_total_size(edges);
+	cout << edges.size() << endl << total_edges << endl;
+	print_edge_per_line(edges, ',');
 }
 
 vector<string> read_word_list(){
@@ -108,35 +113,77 @@ bool neighborhood_intersection_at_least(const vector<fast_set<size_t>> & edges, 
 	return false;
 }
 
-vector<vector<size_t>> remove_redundant_edges(const vector<vector<size_t>> & edges){
+void remove_redundant_edges(vector<fast_set<size_t>> & edges){
 	int count = 0;
 	int prev_count = -1;
-	vector<fast_set<size_t>> transformed = transform(edges);
 	while(count != prev_count){
 		prev_count = count;
-		for(size_t i= 0; i <transformed.size(); ++i){
+		for(size_t i= 0; i <edges.size(); ++i){
 			fast_set<size_t> replacement;
-			for(size_t j : transformed[i]){
-				if(!neighborhood_intersection_at_least(transformed, i, j,3)){
+			for(size_t j : edges[i]){
+				if(!neighborhood_intersection_at_least(edges, i, j,3)){
 					count += 1;
-					transformed[j].erase(i);
+					edges[j].erase(i);
 				} else{
 					replacement.insert(j);
 				}
 			}
-			transformed[i] = replacement;
+			edges[i] = replacement;
 		}
 		cerr << count << endl;
 	}
 	cerr << "pruning done" << endl;
-	return retransform(transformed);
+}
+
+bool neighbors_all(const vector<fast_set<size_t>> & edges, size_t v, const vector<size_t> & acc){
+	for(size_t u: acc){
+		if(edges[v].count(u) == 0){
+			return false;
+		}
+	}
+	return true;
+}
+fast_set<size_t> intersect(const fast_set<size_t> & a, const fast_set<size_t> & b){
+	fast_set<size_t> intersection;
+	for(size_t c : a){
+		if(b.count(c)){
+			intersection.insert(c);
+		}
+	}
+	return intersection;
+}
+
+void find_clique(const vector<fast_set<size_t>> & edges, const fast_set<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc){
+	if(k == acc.size()){
+		for(size_t w : acc){
+			cout << w << " ";
+		}
+		cout  << endl;
+		return;
+	}
+	size_t last = acc[acc.size()-1];
+	for(size_t v : intersection_vertices){
+		if(last < v && neighbors_all(edges, v, acc)){
+			acc.push_back(v);
+			fast_set<size_t> new_intersection = intersect(intersection_vertices, edges[v]);
+			find_clique(edges, new_intersection, k, acc);
+			acc.pop_back();
+		}
+	}
 }
 
 int main(void){
 	ios_base::sync_with_stdio(0); cin.tie(0);
 	vector<string> word_list = read_word_list();
 	vector<vector<size_t>> edges = construct_edges(word_list);
-	vector<vector<size_t>> pruned = remove_redundant_edges(edges);
-	print_custom(pruned);
+	vector<fast_set<size_t>> faster_edges = transform(edges);
+	// remove_redundant_edges(faster_edges);
+	for(size_t v = 0; v < edges.size(); ++v){
+		vector<size_t> acc{v};
+		cerr << v << endl;
+		find_clique(faster_edges, faster_edges[v], 5, acc);
+	}
+	// edges = retransform(faster_edges);
+	// print_edge_per_line(edges, ' ');
 	return 0;	
 }
