@@ -97,6 +97,16 @@ vector<vector<size_t>> retransform(const vector<fast_set<size_t>> & edges){
 	return result;
 }
 
+vector<vector<bool>> get_adj_matrix(const vector<vector<size_t>> & edges){
+	vector<vector<bool>> matrix(edges.size(), vector<bool>(edges.size(), false));
+	for(size_t i = 0; i < edges.size(); ++i){
+		for(size_t j = 0; j < edges[i].size(); ++j){
+			matrix[i][edges[i][j]] =true;
+		}
+	}
+	return matrix;
+}
+
 bool neighborhood_intersection_at_least(const vector<fast_set<size_t>> & edges, size_t a, size_t b, size_t k){
 	if(edges[a].size() > edges[b].size()){
 		return neighborhood_intersection_at_least(edges, b, a, k);
@@ -135,25 +145,26 @@ void remove_redundant_edges(vector<fast_set<size_t>> & edges){
 	cerr << "pruning done" << endl;
 }
 
-bool neighbors_all(const vector<fast_set<size_t>> & edges, size_t v, const vector<size_t> & acc){
+bool neighbors_all(const vector<vector<bool>> & adj_matrix, size_t v, const vector<size_t> & acc){
 	for(size_t u: acc){
-		if(edges[v].count(u) == 0){
+		if(!adj_matrix[v][u]){
 			return false;
 		}
 	}
 	return true;
 }
-fast_set<size_t> intersect(const fast_set<size_t> & a, const fast_set<size_t> & b){
-	fast_set<size_t> intersection;
-	for(size_t c : a){
-		if(b.count(c)){
-			intersection.insert(c);
+
+vector<size_t> intersect(const vector<size_t> & current, const vector<bool> & neighbours){
+	vector<size_t> intersection;
+	for(size_t c : current){
+		if(neighbours[c]){
+			intersection.push_back(c);
 		}
 	}
 	return intersection;
 }
 
-void find_clique(const vector<fast_set<size_t>> & edges, const fast_set<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc){
+void find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc){
 	if(k == acc.size()){
 		for(size_t w : acc){
 			cout << w << " ";
@@ -163,10 +174,10 @@ void find_clique(const vector<fast_set<size_t>> & edges, const fast_set<size_t> 
 	}
 	size_t last = acc[acc.size()-1];
 	for(size_t v : intersection_vertices){
-		if(last < v && neighbors_all(edges, v, acc)){
+		if(last < v && neighbors_all(adj_matrix, v, acc)){
 			acc.push_back(v);
-			fast_set<size_t> new_intersection = intersect(intersection_vertices, edges[v]);
-			find_clique(edges, new_intersection, k, acc);
+			vector<size_t> new_intersection = intersect(intersection_vertices, adj_matrix[v]);
+			find_clique(adj_matrix, new_intersection, k, acc);
 			acc.pop_back();
 		}
 	}
@@ -175,15 +186,15 @@ void find_clique(const vector<fast_set<size_t>> & edges, const fast_set<size_t> 
 int main(void){
 	ios_base::sync_with_stdio(0); cin.tie(0);
 	vector<string> word_list = read_word_list();
+	cerr << "read input" << endl;
 	vector<vector<size_t>> edges = construct_edges(word_list);
-	vector<fast_set<size_t>> faster_edges = transform(edges);
-	// remove_redundant_edges(faster_edges);
+	cerr << "constructed graph" << endl;
+	vector<vector<bool>> adj_matrix = get_adj_matrix(edges);
+	cerr << "adj matrix" << endl;
 	for(size_t v = 0; v < edges.size(); ++v){
 		vector<size_t> acc{v};
 		cerr << v << endl;
-		find_clique(faster_edges, faster_edges[v], 5, acc);
+		find_clique(adj_matrix, edges[v], 5, acc);
 	}
-	// edges = retransform(faster_edges);
-	// print_edge_per_line(edges, ' ');
 	return 0;	
 }
