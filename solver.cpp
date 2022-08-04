@@ -7,6 +7,9 @@ using vertex_t = int;
 using adj_list_t = vector<vector<vertex_t>>;
 using adj_matrix_t = vector<vector<bool>>;
 
+/*
+ * Checks whether a and b share letters.
+ */
 bool compatible(const string & a, const string &b){
 	for(char c : a){
 		for(char d : b){
@@ -18,7 +21,7 @@ bool compatible(const string & a, const string &b){
 	return true;
 }
 
-adj_list_t construct_edges(const vector<string> & word_list ){
+adj_list_t construct_adj_list(const vector<string> & word_list ){
 	adj_list_t edges(word_list.size());
 	for(size_t i = 0; i < word_list.size(); ++i){
 		for(size_t j = i; j < word_list.size(); ++j){
@@ -73,6 +76,9 @@ bool neighbors_all(const adj_matrix_t & adj_matrix, vertex_t v, const vector<ver
 	return true;
 }
 
+/*
+ * Intersects set of current vertices that could be in the clique with the neighbors of the new vertex.
+ */
 vector<vertex_t> intersect(const vector<vertex_t> & current, const vector<bool> & neighbors){
 	vector<vertex_t> intersection;
 	for(vertex_t c : current){
@@ -83,17 +89,29 @@ vector<vertex_t> intersect(const vector<vertex_t> & current, const vector<bool> 
 	return intersection;
 }
 
-int add_to_footprint(int old_footprint, const string & to_add){
+/*
+ * Footprint is a set representation of letters by single integer. 
+ * For the first 26 bits a letter in the english alphabet is assigned.
+ * If the bit is set to 1 it means the letter is in the set.
+ */
+int add_to_footprint(int footprint, const string & to_add){
 	for(char c: to_add){
-		old_footprint = old_footprint | (1 << (c-'a'));
+		footprint = footprint | (1 << (c-'a'));
 	}
-	return old_footprint;
+	return footprint;
 }
 
+/*
+ * Finds the cliques in recursive manner.
+ * Current clique is in the @acc, which is maintained in ascending order.
+ * The vertices in @acc are a clique, because @intersection_vertices is the intersection of neighbors of the clique.
+ */
 bool find_clique(const adj_matrix_t & adj_matrix, const vector<vertex_t> & intersection_vertices, 
 									size_t k, vector<vertex_t> & acc,  vector<vector<vertex_t>> & cliques,
 					 				const vector<string> & word_list, int current_footprint, fast_map<int, vertex_t> & DP){
 	vertex_t last = acc[acc.size()-1];
+	// in DP the index of smallest vertex that failed with given footprint is stored.
+	// if we encounter vertex with higher label we know, that in this branch no solution can be found.
 	if(DP.count(current_footprint) == 1 && DP[current_footprint] < last){
 		return false;
 	}
@@ -139,7 +157,7 @@ int main(int argc, char ** argv){
 	ios_base::sync_with_stdio(0); cin.tie(0);
 	vector<string> word_list = read_word_list();
 	cerr << "read input" << endl;
-	adj_list_t edges = construct_edges(word_list);
+	adj_list_t edges = construct_adj_list(word_list);
 	cerr << "constructed graph" << endl;
 	adj_matrix_t adj_matrix = adj_list_to_matrix(edges);
 	cerr << "adj matrix" << endl;
