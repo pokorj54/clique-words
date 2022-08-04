@@ -1,7 +1,7 @@
 # Clique words solver
 
 Solver for finding set of words with unique letters.
-The solver is inspired by Matt Parker's (https://www.youtube.com/watch?v=_-AfhLQfb6w)[video] about five five-letter words that have 25 unique letters. He said it took him about a month, which for Benjamin Paassen appeared as optimizable and he created faster (https://gitlab.com/bpaassen/five_clique)[algorithm] that runs about 20 minutes. This solver needs less than a minute and it also can do other lenghts of words other than 5.
+The solver is inspired by Matt Parker's (https://www.youtube.com/watch?v=_-AfhLQfb6w)[video] about five five-letter words that have 25 unique letters. He said it took him about a month, which for Benjamin Paassen appeared as optimizable and he created faster (https://gitlab.com/bpaassen/five_clique)[algorithm] that runs about 20 minutes. This solver needs less than a minute and it also can do other lengths of words other than 5.
 
 ## How to run
 1. Get your favorite list of words e.g. `words_alpha.txt` from (https://github.com/dwyl/english-words)[this] repository.
