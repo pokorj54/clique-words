@@ -1,6 +1,6 @@
 
 CXX          = g++
-CXXFLAGS     = --std=c++17 -Wall -Wextra -pedantic -g -O3 -march=haswell
+CXXFLAGS     = --std=c++17 -Wall -Wextra -pedantic -g -O3
 
 compile:
 	mkdir -p bin
