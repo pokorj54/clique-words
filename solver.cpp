@@ -130,7 +130,12 @@ void print_cliques(const vector<vector<vertex_t>> & cliques, const vector<string
 	}
 }
 
-int main(void){
+int main(int argc, char ** argv){
+    if(argc <= 1){
+        cerr << "Run this program like " << argv[0] << " <clique_size>" << endl;
+        return 1;
+    }
+	int clique_size = atoi(argv[1]);
 	ios_base::sync_with_stdio(0); cin.tie(0);
 	vector<string> word_list = read_word_list();
 	cerr << "read input" << endl;
@@ -143,7 +148,7 @@ int main(void){
 	for(vertex_t v = 0; v < (vertex_t)edges.size(); ++v){
 		vector<vertex_t> acc{v};
 		cerr << v << endl;
-		find_clique(adj_matrix, edges[v], 5, acc, cliques, word_list, add_to_footprint(0, word_list[v]), DP);
+		find_clique(adj_matrix, edges[v], clique_size, acc, cliques, word_list, add_to_footprint(0, word_list[v]), DP);
 	}
 	print_cliques(cliques, word_list);
 	return 0;	

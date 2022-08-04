@@ -36,8 +36,13 @@ void filter(F f){
     }
 }
 
-int main(void){
+int main(int argc, char ** argv){
+    if(argc <= 1){
+        cerr << "Run this program like " << argv[0] << " <words_lengths>" << endl;
+        return 1;
+    }
+    size_t length = atoi(argv[1]);
 	ios_base::sync_with_stdio(0); cin.tie(0);
-    filter([](const string & s){return s.size() == 5 && !multiple_occurrences(s) && !permutation_of_seen(s); });
+    filter([&length](const string & s){return s.size() == length && !multiple_occurrences(s) && !permutation_of_seen(s); });
 	return 0;	
 }
