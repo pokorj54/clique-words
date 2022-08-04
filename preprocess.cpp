@@ -164,21 +164,42 @@ vector<size_t> intersect(const vector<size_t> & current, const vector<bool> & ne
 	return intersection;
 }
 
-void find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> &  intersection_vertices, size_t k, vector<size_t> & acc, 
-					vector<vector<size_t>> & cliques){
+int add_to_footprint(int old_footprint, const string & to_add){
+	for(char c: to_add){
+		old_footprint = old_footprint | (1 << (c-'a'));
+	}
+	return old_footprint;
+}
+
+bool find_clique(const vector<vector<bool>> & adj_matrix, const vector<size_t> & intersection_vertices, 
+									size_t k, vector<size_t> & acc,  vector<vector<size_t>> & cliques,
+					 				const vector<string> & word_list, int current_footprint, fast_map<int, int> & DP){
+	int last = acc[acc.size()-1];
+	if(DP.count(current_footprint) == 1 && DP[current_footprint] < last){
+		return false;
+	}
 	if(k == acc.size()){
 		cliques.push_back(acc);
-		return;
+		return true;
 	}
-	size_t last = acc[acc.size()-1];
+	bool result = false;
 	for(size_t v : intersection_vertices){
 		if(last < v && neighbors_all(adj_matrix, v, acc)){
 			acc.push_back(v);
 			vector<size_t> new_intersection = intersect(intersection_vertices, adj_matrix[v]);
-			find_clique(adj_matrix, new_intersection, k, acc, cliques);
+			int v_footprint = add_to_footprint(current_footprint, word_list[v]);
+			result = find_clique(adj_matrix, new_intersection, k, acc, cliques, word_list, v_footprint, DP) || result;
 			acc.pop_back();
 		}
 	}
+	if(!result){
+		if(DP.count(current_footprint) > 0){
+			DP[current_footprint] = std::min(last, DP[current_footprint]);
+		} else{
+			DP[current_footprint] = last;
+		}
+	}
+	return result;
 }
 
 void print_cliques(const vector<vector<size_t>> & cliques, const vector<string> & word_list){
@@ -199,10 +220,11 @@ int main(void){
 	vector<vector<bool>> adj_matrix = get_adj_matrix(edges);
 	cerr << "adj matrix" << endl;
 	vector<vector<size_t>> cliques;
+	fast_map<int, int> DP;
 	for(size_t v = 0; v < edges.size(); ++v){
 		vector<size_t> acc{v};
 		cerr << v << endl;
-		find_clique(adj_matrix, edges[v], 5, acc, cliques);
+		find_clique(adj_matrix, edges[v], 5, acc, cliques, word_list, add_to_footprint(0, word_list[v]), DP);
 	}
 	print_cliques(cliques, word_list);
 	return 0;	
