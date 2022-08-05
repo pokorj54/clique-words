@@ -149,6 +149,37 @@ void print_cliques(const vector<vector<vertex_t>> & cliques, const vector<string
 	}
 }
 
+
+class ProgressBar{
+	const string unit;
+	string progress_bar = "[]";
+	const int progress_bar_width = 50;
+	int curr_progress_width = 0;
+	int goal;
+
+	public:
+	ProgressBar(int goal, const string & unit ): unit(unit), goal(goal){
+		for(int i = 0; i < progress_bar_width; ++i){
+			progress_bar.insert(1, 1, '-');
+		}
+	}
+
+	void update(int progress){
+		double percentage = (progress * 100.0)/goal;
+		if(percentage > (double)curr_progress_width*100.0/progress_bar_width){
+			progress_bar[curr_progress_width + 1] = '#';
+			++curr_progress_width;
+		}
+
+		cerr << "\r [" << progress << "/" << goal << " " << unit << "] [" << static_cast<int>(percentage) << '%' << "] " << progress_bar << std::flush;
+	}
+
+	void finish(){
+		update(goal);
+		cerr << endl;
+	}
+};
+
 int main(int argc, char ** argv){
     if(argc <= 1){
         cerr << "Run this program like " << argv[0] << " <clique_size>" << endl;
@@ -156,38 +187,27 @@ int main(int argc, char ** argv){
     }
 	int clique_size = atoi(argv[1]);
 	ios_base::sync_with_stdio(0); cin.tie(0);
+
+	cerr << "Reading input" << endl;
 	vector<string> word_list = read_word_list();
-	cerr << "read input" << endl;
+	cerr << "Constructing graph" << endl;
 	adj_list_t edges = construct_adj_list(word_list);
-	cerr << "constructed graph" << endl;
+	cerr << "Constructing adjacency matrix" << endl;
 	adj_matrix_t adj_matrix = adj_list_to_matrix(edges);
-	cerr << "adj matrix" << endl;
+	
+	cerr << "Finding cliques" << endl;
 	vector<vector<vertex_t>> cliques;
 	fast_map<int, vertex_t> DP;
+    size_t num_words = word_list.size();
+	ProgressBar PB(num_words, "words");
 
-    string progress_bar = "[]";
-    const int progress_bar_width = 50;
-    int curr_progress_width = 0;
-    for(int i = 0; i < progress_bar_width; ++i)
-        progress_bar.insert(1, 1, '-');
-    double percentage = 0.0;
-    cout << "Finding cliques:" << endl;
-
-    size_t num_edges = edges.size();
-
-	for(vertex_t v = 0; v < (vertex_t)num_edges; ++v){
+	for(vertex_t v = 0; v < (vertex_t)num_words; ++v){
 		vector<vertex_t> acc{v};
-
-        percentage = (v * 100.0)/num_edges;
-        if(percentage >= (double)curr_progress_width*100.0/progress_bar_width){
-            progress_bar[curr_progress_width + 1] = '#';
-            ++curr_progress_width;
-        }
-
-        cout << "\r [" << v << "/" << num_edges << " words] [" << static_cast<int>(percentage) << '%' << "] " << progress_bar << std::flush;
-
+		PB.update(v);
 		find_clique(adj_matrix, edges[v], clique_size, acc, cliques, word_list, add_to_footprint(0, word_list[v]), DP);
 	}
+	PB.finish();
+
 	print_cliques(cliques, word_list);
 	return 0;	
 }
