@@ -140,7 +140,6 @@ bool find_clique(const adj_matrix_t & adj_matrix, const vector<vertex_t> & inter
 }
 
 void print_cliques(const vector<vector<vertex_t>> & cliques, const vector<string> & word_list){
-    cout << endl;
 	for(size_t i = 0; i < cliques.size(); ++i){
 		for(size_t j = 0; j < cliques[i].size(); ++j){
 			cout << word_list[cliques[i][j]] << " ";
