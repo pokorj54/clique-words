@@ -140,6 +140,7 @@ bool find_clique(const adj_matrix_t & adj_matrix, const vector<vertex_t> & inter
 }
 
 void print_cliques(const vector<vector<vertex_t>> & cliques, const vector<string> & word_list){
+    cout << endl;
 	for(size_t i = 0; i < cliques.size(); ++i){
 		for(size_t j = 0; j < cliques[i].size(); ++j){
 			cout << word_list[cliques[i][j]] << " ";
@@ -163,9 +164,28 @@ int main(int argc, char ** argv){
 	cerr << "adj matrix" << endl;
 	vector<vector<vertex_t>> cliques;
 	fast_map<int, vertex_t> DP;
-	for(vertex_t v = 0; v < (vertex_t)edges.size(); ++v){
+
+    string progress_bar = "[]";
+    const int progress_bar_width = 50;
+    int curr_progress_width = 0;
+    for(int i = 0; i < progress_bar_width; ++i)
+        progress_bar.insert(1, 1, '-');
+    double percentage = 0.0;
+    cout << "Finding cliques:" << endl;
+
+    size_t num_edges = edges.size();
+
+	for(vertex_t v = 0; v < (vertex_t)num_edges; ++v){
 		vector<vertex_t> acc{v};
-		cerr << v << endl;
+
+        percentage = (v * 100.0)/num_edges;
+        if(percentage >= (double)curr_progress_width*100.0/progress_bar_width){
+            progress_bar[curr_progress_width + 1] = '#';
+            ++curr_progress_width;
+        }
+
+        cout << "\r [" << v << "/" << num_edges << " words] [" << static_cast<int>(percentage) << '%' << "] " << progress_bar << std::flush;
+
 		find_clique(adj_matrix, edges[v], clique_size, acc, cliques, word_list, add_to_footprint(0, word_list[v]), DP);
 	}
 	print_cliques(cliques, word_list);
