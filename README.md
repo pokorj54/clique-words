@@ -28,3 +28,10 @@ The algorithm was tested on IntelCore i7-8550U with 16 GB RAM using `words_alpha
 With added compilation flag `-march=haswell` the algorithm managed to find all cliques of size 5 in `30,279` seconds.
 Without it, it finished in `40,047` seconds.
 
+## Other solvers
+
+Here I would like to list other people solution of the same problem:
+- [standupmaths/fiveletterworda](https://github.com/standupmaths/fiveletterworda)
+- [Benjamin Paassen/five_clique](https://gitlab.com/bpaassen/five_clique)
+- [orlp/matt-parker-five-letter-clique ](https://github.com/orlp/matt-parker-five-letter-clique)
+- [oisyn/parkerwords](https://github.com/oisyn/parkerwords)
